@@ -1,0 +1,9 @@
+version: '3'
+
+# for build only
+services:
+  alexa:
+    build: 
+      context: ./
+    container_name: alexa
+    image: karsten13/alexa:latest
