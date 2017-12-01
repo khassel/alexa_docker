@@ -1,0 +1,20 @@
+sudo: required
+services:
+- docker
+language: bash
+env:
+  global:
+    - LANG=de_DE.UTF-8
+script:
+# prepare qemu
+- docker run --rm --privileged multiarch/qemu-user-static:register --reset
+# build image
+- cd ./build
+- docker-compose build
+# push image
+- docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
+- docker push karsten13/alexa:latest
+- docker push karsten13/alexa:$TRAVIS_JOB_NUMBER
+# test image
+- cd ../run
+- docker-compose up -d

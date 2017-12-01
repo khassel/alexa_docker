@@ -9,10 +9,7 @@ services:
     volumes:
       - ~/alexa/container:/srv/alexa-avs-sample-app/samples
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - /etc/localtime:/etc/localtime:ro
       - /opt/vc:/opt/vc/:ro
-      - /run/systemd:/run/systemd
-    network_mode: host
     environment:
       # system params:
       - LD_LIBRARY_PATH=/opt/vc/lib
