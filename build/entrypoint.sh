@@ -24,8 +24,11 @@ use_template()
 # Checking if script has been updated by the user with ProductID, ClientID, and ClientSecret
 #--------------------------------------------------------------------------------------------
 if [ ! -f $Java_Client_Loc/README.txt ]; then
-  mv $Origin/samples_ori/* $Origin/samples/
-  rm -rf $Origin/samples_ori/
+  mv $Origin/samples_ori/javaclient/* $Origin/samples/javaclient/
+fi
+
+if [ ! -f $Companion_Service_Loc/app.js ]; then
+  mv $Origin/samples_ori/companionService/* $Origin/samples/companionService/
 fi
 
 if [ ! -f $Java_Client_Loc/certs/ca/ca.crt ]; then

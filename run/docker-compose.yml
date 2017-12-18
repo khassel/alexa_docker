@@ -4,10 +4,9 @@ services:
   alexa:
     container_name: al
     image: karsten13/alexa:latest
-    ports:
-      - "3000:3000"
     volumes:
-      - ~/alexa/container:/srv/alexa-avs-sample-app/samples
+      - ~/alexa/container/companionService:/srv/alexa-avs-sample-app/samples/companionService
+      - ~/alexa/container/javaclient:/srv/alexa-avs-sample-app/samples/javaclient
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /opt/vc:/opt/vc/:ro
     environment:

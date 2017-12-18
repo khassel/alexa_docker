@@ -15,17 +15,17 @@ ENV Kitt_Ai_Loc=$Wake_Word_Agent_Loc/kitt_ai
 ENV Sensory_Loc=$Wake_Word_Agent_Loc/sensory
 ENV External_Loc=$Wake_Word_Agent_Loc/ext
 
-RUN apt-get update && apt-get upgrade -yq
+RUN apt-get update && apt-get upgrade -y
 
 RUN apt-get install -y git libasound2-dev libatlas-base-dev wiringpi alsa-utils cmake nano && ldconfig
 
-RUN git clone https://github.com/alexa/alexa-avs-sample-app.git $Origin
+RUN git clone --depth 1 -b master --single-branch https://github.com/alexa/alexa-avs-sample-app.git $Origin
 
 RUN mkdir -p $Kitt_Ai_Loc && mkdir -p $Sensory_Loc && mkdir -p $External_Loc
 
-RUN cd $Kitt_Ai_Loc && git clone https://github.com/Kitt-AI/snowboy.git
+RUN cd $Kitt_Ai_Loc && git clone --depth 1 -b master --single-branch https://github.com/Kitt-AI/snowboy.git
 
-RUN cd $Sensory_Loc && git clone https://github.com/Sensory/alexa-rpi.git
+RUN cd $Sensory_Loc && git clone --depth 1 -b master --single-branch https://github.com/Sensory/alexa-rpi.git
 
 RUN cd $Origin
 
@@ -87,9 +87,14 @@ RUN cd $Java_Client_Loc && mvn validate && mvn install && cd $Origin
 RUN echo "========== Installing Companion Service ==========" \
   && cd $Companion_Service_Loc && npm install && cd $Origin
 
+RUN echo "========== überflüssige Ordner löschen ==========" \
+  && rm -rf $Samples_Loc/iOSCompanionApp \
+  && rm -rf $Samples_Loc/androidCompanionApp
+  
+  
 RUN chown -R root:root $Origin && chown -R root:root /root/.asoundrc && cd $Origin
 
-RUN mkdir $Origin/samples_ori && cp -pR $Origin/samples/* $Origin/samples_ori/
+RUN mkdir $Origin/samples_ori && mv $Origin/samples/companionService/ $Origin/samples_ori/companionService/ && mv $Origin/samples/javaclient/ $Origin/samples_ori/javaclient/
 
 WORKDIR $Origin
 
