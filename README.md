@@ -1,30 +1,8 @@
 # Run alexa on a raspberry pi
 
 ### Requirements
-- raspberry pi version 2 or 3 with running raspian jessie
-- LAN or WLAN access
-- logged in as user pi (otherwise you have to substitute "pi" with your user in the following lines)
+[please read the wiki-section](https://github.com/khassel/alexa_docker/wiki/Prepare-your-raspberry-pi)
 
-### Setup Docker
-- get Docker: ```curl -sSL get.docker.com | sh```
-- set Docker to auto-start: ```sudo systemctl enable docker```
-- start the Docker daemon: ```sudo systemctl start docker``` (or reboot your pi)
-- add user pi to docker group: ```sudo usermod -aG docker pi```
-
-### Setup docker-compose
-- execute the following lines:
-	```bash
-	sudo apt-get purge python-pip
-	curl https://bootstrap.pypa.io/get-pip.py | sudo python
-	sudo pip install docker-compose
-	```
-
-### Setup for graphical desktop
-- edit (here with nano) ```nano ~/.bashrc``` and insert the following lines (otherwise docker has no access on the pi display):
-    ```bash
-    export DISPLAY=:0.0
-    xhost +local:root
-    ```
 ### Setup alexa docker image
 -	```bash
 	git clone --depth 1 -b master https://github.com/khassel/alexa_docker.git ~/alexa
