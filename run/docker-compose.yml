@@ -9,6 +9,7 @@ services:
       - ~/alexa/container/companionService/refresh_tokens:/srv/alexa-avs-sample-app/samples/companionService/refresh_tokens
       - ~/alexa/container/javaclient/config.json:/srv/alexa-avs-sample-app/samples/javaclient/config.json
       - ~/alexa/container/javaclient/certs:/srv/alexa-avs-sample-app/samples/javaclient/certs
+#      - ~/alexa/container/wakeWordAgent/Hilde.pmdl:/srv/alexa-avs-sample-app/samples/wakeWordAgent/ext/resources/alexa.umdl
       - /tmp/.X11-unix:/tmp/.X11-unix
       - /opt/vc:/opt/vc/:ro
     environment:

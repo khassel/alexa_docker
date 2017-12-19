@@ -80,7 +80,7 @@ cd $Companion_Service_Loc && npm start > npm.log 2>&1 &
 if [ "$Wake_Word_Detection_Enabled" == "true" ]; then
   cd $Java_Client_Loc && mvn exec:exec 2>&1 &
   sleep 25
-  cd $Wake_Word_Agent_Loc/src && ./wakeWordAgent -e $Wake_Word_Detection > wakeWordAgent.log
+  cd $Wake_Word_Agent_Loc/src && make && ./wakeWordAgent -e $Wake_Word_Detection > wakeWordAgent.log
 else  
   cd $Java_Client_Loc && mvn exec:exec
 fi

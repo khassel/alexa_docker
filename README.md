@@ -43,3 +43,6 @@
 - follow the documentation [here](https://github.com/alexa/alexa-avs-sample-app/wiki/Raspberry-Pi) beginning at "Step 7", "Terminal Window 2", "Let's walk through the next few steps relevant to Window 2." and skip "Terminal Window 3".
 
 > The container is configured to restart automatically so after executing ```docker-compose up -d``` it will restart with every reboot of your pi.
+
+### Alternative wakeword with Kitt-AI
+If you don't want to talk with "Alexa", [create your own wakeword.](https://github.com/khassel/alexa_docker/wiki/Alternative-WakeWord-with-Kitt-AI)
