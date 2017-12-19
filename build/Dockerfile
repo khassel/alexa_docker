@@ -94,8 +94,6 @@ RUN echo "========== überflüssige Ordner löschen ==========" \
   
 RUN chown -R root:root $Origin && chown -R root:root /root/.asoundrc && cd $Origin
 
-RUN mkdir $Origin/samples_ori && mv $Origin/samples/companionService/ $Origin/samples_ori/companionService/ && mv $Origin/samples/javaclient/ $Origin/samples_ori/javaclient/
-
 WORKDIR $Origin
 
 COPY entrypoint.sh $Origin
