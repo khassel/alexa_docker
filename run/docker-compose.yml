@@ -5,8 +5,7 @@ services:
     container_name: al
     image: karsten13/alexa:latest
     volumes:
-      - ~/alexa/container/companionService/config.js:/srv/alexa-avs-sample-app/samples/companionService/config.js
-      - ~/alexa/container/companionService/refresh_tokens:/srv/alexa-avs-sample-app/samples/companionService/refresh_tokens
+      - ~/alexa/container/companionService:/srv/alexa-avs-sample-app/samples/companionService
       - ~/alexa/container/javaclient/config.json:/srv/alexa-avs-sample-app/samples/javaclient/config.json
       - ~/alexa/container/javaclient/certs:/srv/alexa-avs-sample-app/samples/javaclient/certs
 #      - ~/alexa/container/wakeWordAgent/Hilde.pmdl:/srv/alexa-avs-sample-app/samples/wakeWordAgent/ext/resources/alexa.umdl

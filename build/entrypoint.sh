@@ -24,6 +24,10 @@ use_template()
 # Checking if script has been updated by the user with ProductID, ClientID, and ClientSecret
 #--------------------------------------------------------------------------------------------
 
+if [ ! -f $Companion_Service_Loc/app.js ]; then
+  mv $Origin/samples_ori/companionService/* $Origin/samples/companionService/
+fi
+
 if [ ! -f $Java_Client_Loc/certs/ca/ca.crt ]; then
 	echo "========== Generating ssl.cnf =========="
 	if [ -f $Java_Client_Loc/ssl.cnf ]; then
@@ -44,8 +48,6 @@ if [ ! -f $Java_Client_Loc/certs/ca/ca.crt ]; then
 
 	echo "========== Configuring Companion Service =========="
 	use_template $Companion_Service_Loc template_config_js config.js
-    chown root:root $Companion_Service_Loc/config.js
-    chown root:root $Companion_Service_Loc/refresh_tokens
 	
 	echo "========== Configuring Java Client =========="
 	use_template $Java_Client_Loc template_config_json config.json
