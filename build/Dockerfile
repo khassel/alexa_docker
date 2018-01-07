@@ -1,4 +1,4 @@
-FROM hypriot/rpi-node:latest
+FROM node:latest
 MAINTAINER Karsten Hassel
 
 ENV Origin=/srv/alexa-avs-sample-app
@@ -17,7 +17,7 @@ ENV External_Loc=$Wake_Word_Agent_Loc/ext
 
 RUN apt-get update && apt-get upgrade -y
 
-RUN apt-get install -y git libasound2-dev libatlas-base-dev wiringpi alsa-utils cmake nano && ldconfig
+RUN apt-get install -y git libasound2-dev libatlas-base-dev alsa-utils cmake nano && ldconfig
 
 RUN git clone --depth 1 -b master --single-branch https://github.com/alexa/alexa-avs-sample-app.git $Origin
 
@@ -59,6 +59,8 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
 RUN chmod +x $Java_Client_Loc/install-java8.sh
 RUN cd $Java_Client_Loc && bash ./install-java8.sh && cd $Origin
 
+ENV OS=ubuntu64
+
 RUN echo "========== Preparing External dependencies for Wake Word Agent ==========" \
  && mkdir $External_Loc/include && mkdir $External_Loc/lib && mkdir $External_Loc/resources \
  && cp $Kitt_Ai_Loc/snowboy/include/snowboy-detect.h $External_Loc/include/snowboy-detect.h \
@@ -70,13 +72,15 @@ RUN echo "========== Preparing External dependencies for Wake Word Agent =======
  && cp $Kitt_Ai_Loc/snowboy/resources/common.res $External_Loc/resources/common.res \
  && cp $Kitt_Ai_Loc/snowboy/resources/alexa/alexa-avs-sample-app/alexa.umdl $External_Loc/resources/alexa.umdl \
  && ln -s /usr/lib/atlas-base/atlas/libblas.so.3 $External_Loc/lib/libblas.so.3 \
- && $Sensory_Loc/alexa-rpi/bin/sdk-license file $Sensory_Loc/alexa-rpi/config/license-key.txt $Sensory_Loc/alexa-rpi/lib/libsnsr.a $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-20500.snsr $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-21000.snsr $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-31000.snsr \
  && cp $Sensory_Loc/alexa-rpi/include/snsr.h $External_Loc/include/snsr.h \
  && cp $Sensory_Loc/alexa-rpi/lib/libsnsr.a $External_Loc/lib/libsnsr.a \
  && cp $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-31000.snsr $External_Loc/resources/spot-alexa-rpi.snsr \
  && mkdir $Wake_Word_Agent_Loc/tst/ext \
  && cp -R $External_Loc/* $Wake_Word_Agent_Loc/tst/ext \
  && cd $Origin
+
+COPY ./src/* $Wake_Word_Agent_Loc/src/
+COPY ./tst/* $Wake_Word_Agent_Loc/tst/
 
 RUN echo "========== Compiling Wake Word Agent ==========" \
  && cd $Wake_Word_Agent_Loc/src && cmake . && make -j4 \
@@ -100,3 +104,8 @@ WORKDIR $Origin
 
 COPY entrypoint.sh $Origin
 RUN cd $Origin && chmod +x entrypoint.sh
+
+ENV nvidia_version=340.104
+
+ENV nvidia_driver_uri=http://us.download.nvidia.com/XFree86/Linux-x86_64/${nvidia_version}/NVIDIA-Linux-x86_64-${nvidia_version}.run
+RUN wget -O nvidia-driver.run $nvidia_driver_uri
