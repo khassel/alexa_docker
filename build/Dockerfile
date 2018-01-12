@@ -104,8 +104,3 @@ WORKDIR $Origin
 
 COPY entrypoint.sh $Origin
 RUN cd $Origin && chmod +x entrypoint.sh
-
-ENV nvidia_version=340.104
-
-ENV nvidia_driver_uri=http://us.download.nvidia.com/XFree86/Linux-x86_64/${nvidia_version}/NVIDIA-Linux-x86_64-${nvidia_version}.run
-RUN wget -O nvidia-driver.run $nvidia_driver_uri

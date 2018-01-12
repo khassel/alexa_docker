@@ -6,15 +6,33 @@ env:
   global:
     - LANG=de_DE.UTF-8
 script:
-# prepare qemu
-- docker run --rm --privileged multiarch/qemu-user-static:register --reset
+- pwd
+- >
+  if [ "$TRAVIS_BRANCH" !== "linux" ] && [ "$TRAVIS_BRANCH" !== "raspi" ]; then
+    # exit
+    exit 0;
+  fi
+
+  if [ "$TRAVIS_BRANCH" !== "linux" ]; then
+    # prepare qemu
+    docker run --rm --privileged multiarch/qemu-user-static:register --reset;
+  fi
 # build image
 - cd ./build
 - docker-compose build
 # push image
 - docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
-- docker push karsten13/alexa:latest
-- docker push karsten13/alexa:$TRAVIS_JOB_NUMBER
+- docker tag karsten13/alexa:latest karsten13/alexa:$TRAVIS_BRANCH
+- docker push karsten13/alexa:$TRAVIS_BRANCH
 # test image
 - cd ../run
+- echo "ProductID=XX" > .env
+- echo "ClientID=XX" >> .env
+- echo "ClientSecret=XX" >> .env
+- echo "DeviceSerialNumber=XX" >> .env
+- echo "KeyStorePassword=XX" >> .env
+- cat ../container/javaclient/config.json
+
 - docker-compose up -d
+- sleep 20s
+- docker logs al
