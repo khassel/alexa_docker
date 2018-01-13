@@ -7,22 +7,20 @@ env:
     - LANG=de_DE.UTF-8
 script:
 - pwd
+- docker-compose version
 - >
-  if [ "$TRAVIS_BRANCH" !== "linux" ] && [ "$TRAVIS_BRANCH" !== "raspi" ]; then
+  if [ "$TRAVIS_BRANCH" !== "ubuntu64" ] && [ "$TRAVIS_BRANCH" !== "rpi" ]; then
     # exit
     exit 0;
   fi
 
-  if [ "$TRAVIS_BRANCH" !== "linux" ]; then
-    # prepare qemu
-    docker run --rm --privileged multiarch/qemu-user-static:register --reset;
-  fi
+# prepare qemu
+- docker run --rm --privileged multiarch/qemu-user-static:register --reset;
 # build image
 - cd ./build
 - docker-compose build
 # push image
 - docker login -u="$DOCKER_USER" -p="$DOCKER_PASS"
-- docker tag karsten13/alexa:latest karsten13/alexa:$TRAVIS_BRANCH
 - docker push karsten13/alexa:$TRAVIS_BRANCH
 # test image
 - cd ../run
@@ -34,5 +32,3 @@ script:
 - cat ../container/javaclient/config.json
 
 - docker-compose up -d
-- sleep 20s
-- docker logs al

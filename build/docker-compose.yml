@@ -5,5 +5,8 @@ services:
   alexa:
     build: 
       context: ./
+      args:
+        myos: "ubuntu64"
+        myimage: "node:latest"
     container_name: alexa
-    image: karsten13/alexa:latest
+    image: karsten13/alexa:ubuntu64

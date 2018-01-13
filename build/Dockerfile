@@ -1,13 +1,11 @@
-FROM node:latest
+ARG myimage
+FROM $myimage
 MAINTAINER Karsten Hassel
 
-ENV Origin=/srv/alexa-avs-sample-app
-RUN mkdir - p $Origin
-
 # Preconfigured variables
-ENV OS=rpi
 ENV Origin=/srv/alexa-avs-sample-app
 ENV Samples_Loc=$Origin/samples
+ENV TMPWWA=$Origin/tmp
 ENV Java_Client_Loc=$Samples_Loc/javaclient
 ENV Wake_Word_Agent_Loc=$Samples_Loc/wakeWordAgent
 ENV Companion_Service_Loc=$Samples_Loc/companionService
@@ -15,9 +13,16 @@ ENV Kitt_Ai_Loc=$Wake_Word_Agent_Loc/kitt_ai
 ENV Sensory_Loc=$Wake_Word_Agent_Loc/sensory
 ENV External_Loc=$Wake_Word_Agent_Loc/ext
 
+ARG myos
+ENV myos=$myos
+
 RUN apt-get update && apt-get upgrade -y
 
 RUN apt-get install -y git libasound2-dev libatlas-base-dev alsa-utils cmake nano && ldconfig
+
+RUN if [ "$myos" = "rpi" ]; then \
+      apt-get install -y wiringpi && ldconfig; \
+    fi
 
 RUN git clone --depth 1 -b master --single-branch https://github.com/alexa/alexa-avs-sample-app.git $Origin
 
@@ -59,28 +64,38 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
 RUN chmod +x $Java_Client_Loc/install-java8.sh
 RUN cd $Java_Client_Loc && bash ./install-java8.sh && cd $Origin
 
-ENV OS=ubuntu64
-
 RUN echo "========== Preparing External dependencies for Wake Word Agent ==========" \
  && mkdir $External_Loc/include && mkdir $External_Loc/lib && mkdir $External_Loc/resources \
  && cp $Kitt_Ai_Loc/snowboy/include/snowboy-detect.h $External_Loc/include/snowboy-detect.h \
  && cp $Kitt_Ai_Loc/snowboy/examples/C++/portaudio/install/include/portaudio.h $External_Loc/include/portaudio.h \
  && cp $Kitt_Ai_Loc/snowboy/examples/C++/portaudio/install/include/pa_ringbuffer.h $External_Loc/include/pa_ringbuffer.h \
  && cp $Kitt_Ai_Loc/snowboy/examples/C++/portaudio/install/include/pa_util.h $External_Loc/include/pa_util.h \
- && cp $Kitt_Ai_Loc/snowboy/lib/$OS/libsnowboy-detect.a $External_Loc/lib/libsnowboy-detect.a \
+ && cp $Kitt_Ai_Loc/snowboy/lib/$myos/libsnowboy-detect.a $External_Loc/lib/libsnowboy-detect.a \
  && cp $Kitt_Ai_Loc/snowboy/examples/C++/portaudio/install/lib/libportaudio.a $External_Loc/lib/libportaudio.a \
  && cp $Kitt_Ai_Loc/snowboy/resources/common.res $External_Loc/resources/common.res \
  && cp $Kitt_Ai_Loc/snowboy/resources/alexa/alexa-avs-sample-app/alexa.umdl $External_Loc/resources/alexa.umdl \
- && ln -s /usr/lib/atlas-base/atlas/libblas.so.3 $External_Loc/lib/libblas.so.3 \
- && cp $Sensory_Loc/alexa-rpi/include/snsr.h $External_Loc/include/snsr.h \
+ && ln -s /usr/lib/atlas-base/atlas/libblas.so.3 $External_Loc/lib/libblas.so.3
+ 
+RUN if [ "$myos" = "rpi" ]; then \
+      $Sensory_Loc/alexa-rpi/bin/sdk-license file $Sensory_Loc/alexa-rpi/config/license-key.txt $Sensory_Loc/alexa-rpi/lib/libsnsr.a $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-20500.snsr $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-21000.snsr $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-31000.snsr; \
+    fi
+ 
+RUN cp $Sensory_Loc/alexa-rpi/include/snsr.h $External_Loc/include/snsr.h \
  && cp $Sensory_Loc/alexa-rpi/lib/libsnsr.a $External_Loc/lib/libsnsr.a \
  && cp $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-31000.snsr $External_Loc/resources/spot-alexa-rpi.snsr \
  && mkdir $Wake_Word_Agent_Loc/tst/ext \
  && cp -R $External_Loc/* $Wake_Word_Agent_Loc/tst/ext \
  && cd $Origin
 
-COPY ./src/* $Wake_Word_Agent_Loc/src/
-COPY ./tst/* $Wake_Word_Agent_Loc/tst/
+RUN mkdir -p $TMPWWA/src && mkdir -p $TMPWWA/tst
+ 
+COPY ./src/* $TMPWWA/src/
+COPY ./tst/* $TMPWWA/tst/
+
+RUN if [ "$myos" = "ubuntu64" ]; then \
+      cp -R $TMPWWA/src/* $Wake_Word_Agent_Loc/src/; \
+      cp -R $TMPWWA/tst/* $Wake_Word_Agent_Loc/tst/; \
+    fi
 
 RUN echo "========== Compiling Wake Word Agent ==========" \
  && cd $Wake_Word_Agent_Loc/src && cmake . && make -j4 \
