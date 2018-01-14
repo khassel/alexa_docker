@@ -1,16 +1,43 @@
-# Run alexa on a raspberry pi
+# Run alexa as docker image
+
+## Setup for raspberry-pi
 
 ### Requirements
 [please read the wiki-section](https://github.com/khassel/alexa_docker/wiki/Prepare-your-raspberry-pi)
 
 ### Setup alexa docker image
 -	```bash
-	git clone --depth 1 -b master https://github.com/khassel/alexa_docker.git ~/alexa
+	git clone --depth 1 -b rpi https://github.com/khassel/alexa_docker.git ~/alexa
 	```
 	
 -	```bash
-	docker pull karsten13/alexa
+	docker pull karsten13/alexa:rpi
 	```
+	
+## Setup for linux
+### Requirements
+- Docker
+- docker-compose
+
+
+### Setup for graphical desktop
+- the following line needs to be executed before starting the container (otherwise docker has no access on the pi display):
+    ```bash
+    xhost +local:root
+    ```
+  may put this line in a startup script.
+  
+### Setup alexa docker image
+-	```bash
+	git clone --depth 1 -b ubuntu64 https://github.com/khassel/alexa_docker.git ~/alexa
+	```
+	
+-	```bash
+	docker pull karsten13/alexa:ubuntu64
+	```
+
+## Next setup steps for raspberry-pi and linux
+	
 -	before starting the container you need to change the docker-compose.yml file:
 	```bash
 	nano ~/alexa/run/docker-compose.yml

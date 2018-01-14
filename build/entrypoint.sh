@@ -47,9 +47,15 @@ if [ ! -f $Java_Client_Loc/certs/ca/ca.crt ]; then
 	cd $Origin
 
 	echo "========== Configuring Companion Service =========="
+	if [ -f $Companion_Service_Loc/config.js ]; then
+	  rm $Companion_Service_Loc/config.js
+	fi
 	use_template $Companion_Service_Loc template_config_js config.js
 	
 	echo "========== Configuring Java Client =========="
+	if [ -f $Java_Client_Loc/config.json ]; then
+	  echo '' > $Java_Client_Loc/config.json
+	fi
 	use_template $Java_Client_Loc template_config_json config.json
     chown root:root $Java_Client_Loc/config.json
 	

@@ -2,6 +2,8 @@ sudo: required
 services:
 - docker
 language: bash
+git:
+  depth: 1
 env:
   global:
     - LANG=de_DE.UTF-8
