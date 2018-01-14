@@ -1,0 +1,12 @@
+version: '3'
+
+# for build only
+services:
+  alexa:
+    build: 
+      context: ./
+      args:
+        myos: "rpi"
+        myimage: "hypriot/rpi-node:latest"
+    container_name: alexa
+    image: karsten13/alexa:rpi
