@@ -20,8 +20,10 @@ RUN apt-get update && apt-get upgrade -y
 
 RUN apt-get install -y git libasound2-dev libatlas-base-dev alsa-utils cmake nano && ldconfig
 
+ENV WIRINGPI_SUDO=""
+
 RUN if [ "$myos" = "rpi" ]; then \
-      apt-get install -y wiringpi && ldconfig; \
+      cd && git clone git://git.drogon.net/wiringPi && cd ~/wiringPi  && ./build; \
     fi
 
 RUN git clone --depth 1 -b master --single-branch https://github.com/alexa/alexa-avs-sample-app.git $Origin
