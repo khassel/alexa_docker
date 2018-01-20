@@ -4,6 +4,8 @@ services:
   alexa:
     container_name: al
     image: karsten13/alexa:ubuntu64
+    ports:
+      - 3000:3000
     volumes:
       - ../container/companionService:/srv/alexa-avs-sample-app/samples/companionService
       - ../container/javaclient/config.json:/srv/alexa-avs-sample-app/samples/javaclient/config.json
