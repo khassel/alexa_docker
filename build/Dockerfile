@@ -4,23 +4,22 @@ MAINTAINER Karsten Hassel
 
 # Preconfigured variables
 ENV Origin=/srv/alexa-avs-sample-app
-ENV Samples_Loc=$Origin/samples
-ENV TMPWWA=$Origin/tmp
-ENV Java_Client_Loc=$Samples_Loc/javaclient
-ENV Wake_Word_Agent_Loc=$Samples_Loc/wakeWordAgent
-ENV Companion_Service_Loc=$Samples_Loc/companionService
-ENV Kitt_Ai_Loc=$Wake_Word_Agent_Loc/kitt_ai
-ENV Sensory_Loc=$Wake_Word_Agent_Loc/sensory
-ENV External_Loc=$Wake_Word_Agent_Loc/ext
-
+ENV Samples_Loc=$Origin/samples \
+    TMPWWA=$Origin/tmp
+ENV Java_Client_Loc=$Samples_Loc/javaclient \
+    Wake_Word_Agent_Loc=$Samples_Loc/wakeWordAgent \
+    Companion_Service_Loc=$Samples_Loc/companionService
+ENV Kitt_Ai_Loc=$Wake_Word_Agent_Loc/kitt_ai \
+    Sensory_Loc=$Wake_Word_Agent_Loc/sensory \
+    External_Loc=$Wake_Word_Agent_Loc/ext \
+    WIRINGPI_SUDO=""
+	
 ARG myos
 ENV myos=$myos
 
 RUN apt-get update && apt-get upgrade -y
 
-RUN apt-get install -y git libasound2-dev libatlas-base-dev alsa-utils cmake nano && ldconfig
-
-ENV WIRINGPI_SUDO=""
+RUN apt-get install -y git libasound2-dev libatlas-base-dev alsa-utils cmake nano wget build-essential curl gnupg vlc vlc-nox vlc-data && ldconfig
 
 RUN if [ "$myos" = "rpi" ]; then \
       cd && git clone git://git.drogon.net/wiringPi && cd ~/wiringPi  && ./build; \
@@ -37,21 +36,16 @@ RUN cd $Sensory_Loc && git clone --depth 1 -b master --single-branch https://git
 
 RUN cd $Origin
 
-RUN apt-get install -y vlc vlc-nox vlc-data
 RUN sh -c "echo \"/usr/lib/vlc\" >> /etc/ld.so.conf.d/vlc_lib.conf"
 RUN sh -c "echo \"VLC_PLUGIN_PATH=\"/usr/lib/vlc/plugin\"\" >> /etc/environment"
 
 RUN mkdir $Java_Client_Loc/lib && Target_Lib=`ldconfig -p | grep libvlc.so | sort | tail -n 1 | rev | cut -d " " -f 1 | rev` \
  && ln -s $Target_Lib $Java_Client_Loc/lib/libvlc.so && ldconfig
 
-RUN apt-get install -y curl gnupg && ldconfig
-
 RUN curl -sL https://deb.nodesource.com/setup_9.x | bash -
 RUN apt-get install -y nodejs && node -v && ldconfig
 
 RUN apt-get install -y maven && mvn -version && ldconfig
-
-RUN apt-get install -y wget build-essential && ldconfig
 
 RUN echo "========== Downloading and Building Port Audio Library needed for Kitt-Ai Snowboy ==========" \
   && cd $Kitt_Ai_Loc/snowboy/examples/C++ \
@@ -65,16 +59,16 @@ RUN cd $Kitt_Ai_Loc/snowboy/examples/C++ \
 RUN echo "========== Configuring ALSA Devices ==========" \
  && printf "pcm.!default {\n  type asym\n   playback.pcm {\n     type plug\n     slave.pcm \"hw:0,0\"\n   }\n   capture.pcm {\n     type plug\n     slave.pcm \"hw:1,0\"\n   }\n}" >> /root/.asoundrc
 
-#RUN echo "deb http://http.debian.net/debian jessie-backports main" >> /etc/apt/sources.list && cat /etc/apt/sources.list
-
-RUN apt-get -y autoremove && apt-get -y remove --purge oracle-java8-jdk oracle-java7-jdk openjdk-7-jre openjdk-8-jre
+RUN java -version
+ 
+RUN apt-get -y autoremove && apt-get -y remove --purge openjdk-7-jre
 
 RUN echo "deb http://http.debian.net/debian jessie-backports main" >> /etc/apt/sources.list && cat /etc/apt/sources.list
 
 RUN apt-get update && ldconfig
 
 RUN echo "========== Installing Java Client ==========" \
- && apt install -t jessie-backports openjdk-8-jdk -y \
+ && apt install -t jessie-backports openjdk-8-jdk -y --force-yes \
  && update-java-alternatives --set java-1.8.0-openjdk-armhf \
  && cd $Origin
  
@@ -131,6 +125,7 @@ RUN echo "========== überflüssige Ordner löschen ==========" \
   && rm -rf $Samples_Loc/iOSCompanionApp \
   && rm -rf $Samples_Loc/androidCompanionApp
   
+RUN apt-get autoremove && apt-get clean  
   
 RUN chown -R root:root $Origin && chown -R root:root /root/.asoundrc && cd $Origin
 
@@ -140,3 +135,5 @@ WORKDIR $Origin
 
 COPY entrypoint.sh $Origin
 RUN cd $Origin && chmod +x entrypoint.sh
+
+RUN env
