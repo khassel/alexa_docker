@@ -59,25 +59,12 @@ RUN cd $Kitt_Ai_Loc/snowboy/examples/C++ \
 RUN echo "========== Configuring ALSA Devices ==========" \
  && printf "pcm.!default {\n  type asym\n   playback.pcm {\n     type plug\n     slave.pcm \"hw:0,0\"\n   }\n   capture.pcm {\n     type plug\n     slave.pcm \"hw:1,0\"\n   }\n}" >> /root/.asoundrc
 
-RUN java -version
- 
-RUN apt-get -y autoremove && apt-get -y remove --purge openjdk-7-jre
-
-RUN echo "deb http://http.debian.net/debian jessie-backports main" >> /etc/apt/sources.list && cat /etc/apt/sources.list
-
-RUN apt-get update && ldconfig
-
 RUN echo "========== Installing Java Client ==========" \
- && apt install -t jessie-backports openjdk-8-jdk -y --force-yes \
- && update-java-alternatives --set java-1.8.0-openjdk-armhf \
- && cd $Origin
- 
-ENV Alpn_Version="8.1.11.v20170118"
-
-RUN rm $Java_Client_Loc/pom.xml && cp $Java_Client_Loc/pom_pi.xml $Java_Client_Loc/pom.xml
-
-RUN sed -i "s/The latest version of alpn-boot that supports .*/The latest version of alpn-boot that supports JDK $Java_Version -->/" $Java_Client_Loc/pom.xml \
- && sed -i "s:<alpn-boot.version>.*</alpn-boot.version>:<alpn-boot.version>$Alpn_Version</alpn-boot.version>:" $Java_Client_Loc/pom.xml
+RUN rm -rf $Java_Client_Loc/install-java8.sh
+COPY install-java8.sh $Java_Client_Loc
+RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
+RUN chmod +x $Java_Client_Loc/install-java8.sh
+RUN cd $Java_Client_Loc && bash ./install-java8.sh && cd $Origin
 
 RUN echo "========== Preparing External dependencies for Wake Word Agent ==========" \
  && mkdir $External_Loc/include && mkdir $External_Loc/lib && mkdir $External_Loc/resources \
