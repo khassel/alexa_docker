@@ -37,7 +37,7 @@ RUN echo "config javaclient vlc" && mkdir $Java_Client_Loc/lib \
  && ln -s $Target_Lib $Java_Client_Loc/lib/libvlc.so && ldconfig
 
 RUN echo "setup java-version in project" 
-ENV Alpn_Version="8.1.11.v20170118"
+ENV Alpn_Version="8.1.12.v20180117"
 
 RUN rm $Java_Client_Loc/pom.xml && cp $Java_Client_Loc/pom_pi.xml $Java_Client_Loc/pom.xml
 
