@@ -29,11 +29,11 @@
   
 ### Setup alexa docker image
 -	```bash
-	git clone --depth 1 -b ubuntu64 https://github.com/khassel/alexa_docker.git ~/alexa
+	git clone --depth 1 -b debian https://github.com/khassel/alexa_docker.git ~/alexa
 	```
 	
 -	```bash
-	docker pull karsten13/alexa:ubuntu64
+	docker pull karsten13/alexa:debian
 	```
 
 ## Next setup steps for raspberry-pi and linux
