@@ -11,7 +11,7 @@ script:
 - pwd
 - docker-compose version
 - >
-  if [ "$TRAVIS_BRANCH" !== "ubuntu64" ] && [ "$TRAVIS_BRANCH" !== "rpi" ]; then
+  if [ "$TRAVIS_BRANCH" !== "debian" ] && [ "$TRAVIS_BRANCH" !== "rpi" ] ; then
     # exit
     exit 0;
   fi

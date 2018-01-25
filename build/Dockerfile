@@ -4,65 +4,58 @@ MAINTAINER Karsten Hassel
 
 # Preconfigured variables
 ENV Origin=/srv/alexa-avs-sample-app
-ENV Samples_Loc=$Origin/samples
-ENV TMPWWA=$Origin/tmp
-ENV Java_Client_Loc=$Samples_Loc/javaclient
-ENV Wake_Word_Agent_Loc=$Samples_Loc/wakeWordAgent
-ENV Companion_Service_Loc=$Samples_Loc/companionService
-ENV Kitt_Ai_Loc=$Wake_Word_Agent_Loc/kitt_ai
-ENV Sensory_Loc=$Wake_Word_Agent_Loc/sensory
-ENV External_Loc=$Wake_Word_Agent_Loc/ext
-
+ENV Samples_Loc=$Origin/samples \
+    TMPWWA=$Origin/tmp
+ENV Java_Client_Loc=$Samples_Loc/javaclient \
+    Wake_Word_Agent_Loc=$Samples_Loc/wakeWordAgent \
+    Companion_Service_Loc=$Samples_Loc/companionService
+ENV Kitt_Ai_Loc=$Wake_Word_Agent_Loc/kitt_ai \
+    Sensory_Loc=$Wake_Word_Agent_Loc/sensory \
+    External_Loc=$Wake_Word_Agent_Loc/ext \
+    WIRINGPI_SUDO=""
+	
 ARG myos
 ENV myos=$myos
 
 RUN apt-get update && apt-get upgrade -y
 
-RUN apt-get install -y git libasound2-dev libatlas-base-dev alsa-utils cmake nano && ldconfig
-
 RUN if [ "$myos" = "rpi" ]; then \
-      apt-get install -y wiringpi && ldconfig; \
+      cd && git clone git://git.drogon.net/wiringPi && cd ~/wiringPi  && ./build; \
     fi
-
+	
 RUN git clone --depth 1 -b master --single-branch https://github.com/alexa/alexa-avs-sample-app.git $Origin
 
 RUN mkdir -p $Kitt_Ai_Loc && mkdir -p $Sensory_Loc && mkdir -p $External_Loc
 
 RUN cd $Kitt_Ai_Loc && git clone --depth 1 -b master --single-branch https://github.com/Kitt-AI/snowboy.git
 
-RUN cd $Sensory_Loc && git clone --depth 1 -b master --single-branch https://github.com/Sensory/alexa-rpi.git
+RUN cd $Sensory_Loc && git clone --depth 1 -b master --single-branch https://github.com/Sensory/alexa-rpi.git \
+ && cd $Origin
 
-RUN cd $Origin
-
-RUN apt-get install -y vlc vlc-nox vlc-data
-RUN sh -c "echo \"/usr/lib/vlc\" >> /etc/ld.so.conf.d/vlc_lib.conf"
-RUN sh -c "echo \"VLC_PLUGIN_PATH=\"/usr/lib/vlc/plugin\"\" >> /etc/environment"
-
-RUN mkdir $Java_Client_Loc/lib && Target_Lib=`ldconfig -p | grep libvlc.so | sort | tail -n 1 | rev | cut -d " " -f 1 | rev` \
+RUN echo "config javaclient vlc" && mkdir $Java_Client_Loc/lib \
+ && Target_Lib=`ldconfig -p | grep libvlc.so | sort | tail -n 1 | rev | cut -d " " -f 1 | rev` \
  && ln -s $Target_Lib $Java_Client_Loc/lib/libvlc.so && ldconfig
 
-RUN ln -s /usr/bin/nodejs /usr/bin/node && node -v
+RUN echo "setup java-version in project" 
+ENV Alpn_Version="8.1.12.v20180117"
 
-RUN apt-get install -y maven && mvn -version && ldconfig
+RUN rm $Java_Client_Loc/pom.xml && cp $Java_Client_Loc/pom_pi.xml $Java_Client_Loc/pom.xml
 
+RUN sed -i "s/The latest version of alpn-boot that supports .*/The latest version of alpn-boot that supports JDK $Java_Version -->/" $Java_Client_Loc/pom.xml \
+ && sed -i "s:<alpn-boot.version>.*</alpn-boot.version>:<alpn-boot.version>$Alpn_Version</alpn-boot.version>:" $Java_Client_Loc/pom.xml
+ 
 RUN echo "========== Downloading and Building Port Audio Library needed for Kitt-Ai Snowboy ==========" \
   && cd $Kitt_Ai_Loc/snowboy/examples/C++ \
   && bash ./install_portaudio.sh && ldconfig
   
-RUN cd $Kitt_Ai_Loc/snowboy/examples/C++ \
+RUN echo "compiling Kitt-Ai Snowboy" \
+  && cd $Kitt_Ai_Loc/snowboy/examples/C++ \
   && make -j4 \
   && ldconfig \
   && cd $Origin
 
 RUN echo "========== Configuring ALSA Devices ==========" \
  && printf "pcm.!default {\n  type asym\n   playback.pcm {\n     type plug\n     slave.pcm \"hw:0,0\"\n   }\n   capture.pcm {\n     type plug\n     slave.pcm \"hw:1,0\"\n   }\n}" >> /root/.asoundrc
-
-RUN echo "========== Installing Java Client ==========" \
-RUN rm -rf $Java_Client_Loc/install-java8.sh
-COPY install-java8.sh $Java_Client_Loc
-RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections
-RUN chmod +x $Java_Client_Loc/install-java8.sh
-RUN cd $Java_Client_Loc && bash ./install-java8.sh && cd $Origin
 
 RUN echo "========== Preparing External dependencies for Wake Word Agent ==========" \
  && mkdir $External_Loc/include && mkdir $External_Loc/lib && mkdir $External_Loc/resources \
@@ -110,12 +103,13 @@ RUN echo "========== überflüssige Ordner löschen ==========" \
   && rm -rf $Samples_Loc/iOSCompanionApp \
   && rm -rf $Samples_Loc/androidCompanionApp
   
+RUN apt-get autoremove && apt-get clean  
   
-RUN chown -R root:root $Origin && chown -R root:root /root/.asoundrc && cd $Origin
-
 RUN mkdir $Origin/samples_ori && mv $Origin/samples/companionService/ $Origin/samples_ori/companionService/
 
 WORKDIR $Origin
 
 COPY entrypoint.sh $Origin
 RUN cd $Origin && chmod +x entrypoint.sh
+
+RUN env
