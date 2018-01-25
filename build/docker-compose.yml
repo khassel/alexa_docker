@@ -1,0 +1,12 @@
+version: '3'
+
+# for build only
+services:
+  alexa:
+    build: 
+      context: ./
+      args:
+        myos: "ubuntu64"
+        myimage: "karsten13/alexa-base:debian"
+    container_name: alexa
+    image: karsten13/alexa:debian

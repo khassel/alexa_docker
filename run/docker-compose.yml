@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  alexa:
+    container_name: al
+    image: karsten13/alexa:debian
+    ports:
+      - 3000:3000
+    volumes:
+      - ../container/companionService:/srv/alexa-avs-sample-app/samples/companionService
+      - ../container/javaclient/config.json:/srv/alexa-avs-sample-app/samples/javaclient/config.json
+      - ../container/javaclient/certs:/srv/alexa-avs-sample-app/samples/javaclient/certs
+#      - ../container/wakeWordAgent/Hilde.pmdl:/srv/alexa-avs-sample-app/samples/wakeWordAgent/ext/resources/alexa.umdl
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    privileged: true
+    environment:
+      # system params:
+      - DISPLAY
+      # amazon params:
+      - ProductID=${ProductID}
+      - ClientID=${ClientID}
+      - ClientSecret=${ClientSecret}
+      - DeviceSerialNumber=${DeviceSerialNumber}
+      - KeyStorePassword=${KeyStorePassword}
+      # certificate params:
+      - Country=DE
+      - State=HESSEN
+      - City=FRANKFURT
+      - Organization=karsten13
+      - Locale=de-DE
+      # audio params
+      - Audio=3.5mm
+      - Wake_Word_Detection_Enabled=false
+      - Wake_Word_Detection=kitt_ai
+    devices:
+      - /dev/snd
+      - /dev/bus/usb
+    entrypoint: 
+      - /srv/alexa-avs-sample-app/entrypoint.sh
+#    entrypoint: /bin/bash
+#    stdin_open: true
+#    tty: true      
+    restart: always
