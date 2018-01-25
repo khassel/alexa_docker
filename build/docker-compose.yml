@@ -7,6 +7,6 @@ services:
       context: ./
       args:
         myos: "rpi"
-        myimage: "hypriot/rpi-node:latest"
+        myimage: "karsten13/alexa-base:rpi"
     container_name: alexa
     image: karsten13/alexa:rpi
